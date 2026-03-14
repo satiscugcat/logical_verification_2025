@@ -22,8 +22,9 @@ its argument, or 0 if the argument is 0. For example:
     `pred 7 = 6`
     `pred 0 = 0` -/
 
-def pred : ℕ → ℕ :=
-  sorry
+def pred : ℕ → ℕ
+  | Nat.zero => Nat.zero
+  | Nat.succ n => n
 
 /- 1.2. Check that your function works as expected. -/
 
@@ -61,6 +62,11 @@ def someEnv : String → ℤ
   | _   => 201
 
 #eval eval someEnv (AExp.var "x")   -- expected: 3
+#eval eval someEnv (AExp.add (AExp.var "x") (AExp.num 1)) -- expected : 4 
+#eval eval someEnv (AExp.sub (AExp.var "y") (AExp.num 2)) -- expected : 15
+#eval eval someEnv (AExp.mul (AExp.var "z") (AExp.num 3)) -- expected : 603
+#eval eval someEnv (AExp.div (AExp.var "x") (AExp.num 3)) -- expected : 1
+#eval eval someEnv (AExp.div (AExp.var "x") (AExp.num 0)) -- division by 0 results in 0
 -- invoke `#eval` here
 
 /- 2.2. The following function simplifies arithmetic expressions involving
@@ -71,6 +77,13 @@ operators. -/
 def simplify : AExp → AExp
   | AExp.add (AExp.num 0) e₂ => simplify e₂
   | AExp.add e₁ (AExp.num 0) => simplify e₁
+  | AExp.sub e₁ (AExp.num 0) => simplify e₁
+  | AExp.mul _ (AExp.num 0) => (AExp.num 0)
+  | AExp.mul (AExp.num 0) _ => (AExp.num 0)
+  | AExp.mul e₁ (AExp.num 1) => simplify e₁
+  | AExp.mul (AExp.num 1) e₂ => simplify e₂
+  | AExp.div (AExp.num 0) _ => (AExp.num 0)
+  | AExp.div e₁ (AExp.num 1) => simplify e₁
   -- insert the missing cases here
   -- catch-all cases below
   | AExp.num i               => AExp.num i
@@ -90,7 +103,7 @@ the property that the value of `e` after simplification is the same as the
 value of `e` before. -/
 
 theorem simplify_correct (env : String → ℤ) (e : AExp) :
-  True :=   -- replace `True` by your theorem statement
+  eval env e = eval env (simplify e) :=   -- replace `True` by your theorem statement
   sorry   -- leave `sorry` alone
 
 
@@ -99,8 +112,9 @@ theorem simplify_correct (env : String → ℤ) (e : AExp) :
 3.1 (**optional**). Define a generic `map` function that applies a function to
 every element in a list. -/
 
-def map {α : Type} {β : Type} (f : α → β) : List α → List β :=
-  sorry
+def map {α : Type} {β : Type} (f : α → β) : List α → List β
+  | List.cons hd tl => List.cons (f hd) (map f tl)
+  | List.nil => List.nil
 
 #eval map (fun n ↦ n + 10) [1, 2, 3]   -- expected: [11, 12, 13]
 
@@ -113,6 +127,13 @@ properties of `map` as theorems. Schematically:
 Try to give meaningful names to your theorems. Also, make sure to state the
 second property as generally as possible, for arbitrary types. -/
 
+theorem map_preserves_identity {α: Type} (xs: List α) :
+  map (fun x => x) xs = xs :=
+  sorry
+
+theorem map_preserves_composition {α β γ: Type} (f: α → β) (g: β → γ) (xs: List α) :
+  map (fun x ↦ g (f x)) xs = map g (map f xs) :=
+  sorry
 -- enter your theorem statements here
 
 end LoVe
