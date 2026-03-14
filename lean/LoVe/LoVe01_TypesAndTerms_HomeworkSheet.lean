@@ -36,16 +36,17 @@ constructing a term. By hovering over `_`, you will see the current logical
 context. -/
 
 def B : (α → β) → (γ → α) → γ → β :=
-  sorry
+  fun ab ga g => ab (ga g)
 
 def S : (α → β → γ) → (α → β) → α → γ :=
-  sorry
+  fun abg ab a => abg a (ab a)
 
 def moreNonsense : ((α → β) → γ → δ) → γ → β → δ :=
-  sorry
+  fun ab_g_d g b => ab_g_d (fun _ => b) g
 
 def evenMoreNonsense : (α → β) → (α → γ) → α → β → γ :=
-  sorry
+  fun _ ag a _ => ag a
+  
 
 /- 1.2 (2 points). Complete the following definition.
 
@@ -55,7 +56,7 @@ follow the procedure described in the Hitchhiker's Guide.
 Note: Peirce is pronounced like the English word "purse". -/
 
 def weakPeirce : ((((α → β) → α) → α) → β) → β :=
-  sorry
+  fun ab_a_a_b => ab_a_a_b (fun ab_a => ab_a (fun a => ab_a_a_b (fun _ => a)))
 
 /- ## Question 2 (4 points): Typing Derivation
 
@@ -64,6 +65,24 @@ Unicode art. Start with an empty context. You might find the characters `–` (t
 draw horizontal bars) and `⊢` useful.
 
 Feel free to introduce abbreviations to avoid repeating large contexts `C`. -/
+
+/-
+
+  ————————————————————————————————————————————— Var  —————————————————————————————————————— Var 
+  ab : (α → β), ga : γ → α, g : γ ⊢ ga : γ → α       ab : (α → β), ga : γ → α, g : γ ⊢ g : γ
+  ——————————————————————————————————————————————————————————————————————————————————————— App
+  ———————————————————————————————————————— Var   ab : (α → β), ga : γ → α, g : γ ⊢ ga g : α
+  ab : (α → β), ga : γ → α, g : γ ⊢ ab : α → β
+  ——————————————————————————————————————————————————————————————————————————————————————— App
+  ab : (α → β), ga : γ → α, g : γ ⊢  ab (ga g) :  β
+  ——————————————————————————————————————————————————————— Fun
+  ab : (α → β), ga : γ → α ⊢  (fun g : γ ↦ ab (ga g)) : γ → β
+  ——————————————————————————————————————————————————————————————————— Fun
+  ab : (α → β) ⊢ (fun ga : (γ → α) ↦ (fun g : γ ↦ ab (ga g))) : (γ → α) → γ → β
+  ———————————————————————————————————————————————————————————————————————————————————————————— Fun
+  ∅ ⊢ (fun ab : (α → β) ↦ (fun ga : (γ → α) ↦ (fun g : γ ↦ ab (ga g)))) : (α → β) → (γ → α) → γ → β
+
+-/
 
 -- write your solution here
 
