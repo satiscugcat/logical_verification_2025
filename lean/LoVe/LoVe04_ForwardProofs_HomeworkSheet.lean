@@ -38,14 +38,19 @@ Hint: There is an easy way. -/
 
 theorem about_Impl_term :
     ∀a b : Prop, ¬ a ∨ b → a → b :=
-  sorry
+  fun a b hor ha => Or.elim hor (fun hna => False.elim (hna ha)) fun hb => hb
 
 /- 1.2 (2 points). Prove the same theorem again, this time by providing a
 structured proof, with `fix`, `assume`, and `show`. -/
 
 theorem about_Impl_struct :
     ∀a b : Prop, ¬ a ∨ b → a → b :=
-  sorry
+  fix a: Prop
+  fix b: Prop
+  assume hnab : ¬ a ∨ b
+  assume ha : a
+  show b from
+    Or.elim hnab (fun hna => False.elim (hna ha)) (fun hb => hb)
 
 
 /- ## Question 2 (6 points): Connectives and Quantifiers

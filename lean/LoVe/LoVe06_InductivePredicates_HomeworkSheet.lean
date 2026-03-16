@@ -27,6 +27,8 @@ inductive Term : Type
 /- 1.1 (2 points). Define an inductive predicate `IsLam` that returns `True` if
 its argument is of the form `Term.lam …` and that returns `False` otherwise. -/
 
+inductive IsLam : Term -> Prop
+  | lam s t : IsLam (Term.lam s t)
 -- enter your definition here
 
 /- 1.2 (2 points). Validate your answer to question 1.1 by proving the following
@@ -34,15 +36,16 @@ theorems: -/
 
 theorem IsLam_lam (s : String) (t : Term) :
     IsLam (Term.lam s t) :=
-  sorry
+  IsLam.lam s t 
 
 theorem not_IsLamVar (s : String) :
     ¬ IsLam (Term.var s) :=
-  sorry
+  by
+    intro h; cases h
 
 theorem not_IsLam_app (t u : Term) :
     ¬ IsLam (Term.app t u) :=
-  sorry
+  by intro h; cases h
 
 
 /- ## Question 2 (6 points): Transitive Closure
@@ -52,6 +55,7 @@ set `A` can be defined as the smallest solution satisfying the following rules:
 
     (base) for all `a, b ∈ A`, if `a R b`, then `a R⁺ b`;
     (step) for all `a, b, c ∈ A`, if `a R b` and `b R⁺ c`, then `a R⁺ c`.
+    
 
 In Lean, we can define this notion as follows, by identifying the set `A` with
 the type `α`: -/
@@ -68,6 +72,10 @@ would use replace `(step)` with the following right-leaning rule:
 
 Define a predicate `TCV2` that embodies this alternative definition. -/
 
+inductive TCV2 {α : Type} (R : α → α → Prop) : α → α → Prop
+  | base (a b : α)   : R a b → TCV2 R a b
+  | pets (a b c : α) : TCV2 R a b → R b c → TCV2 R a c
+
 -- enter your definition here
 
 /- 2.2 (2 points). Yet another definition of the transitive closure `R⁺` would
@@ -76,7 +84,9 @@ use the following symmetric rule instead of `(step)` or `(pets)`:
     (trans) for all `a, b, c ∈ A`, if `a R⁺ b` and `b R⁺ c`, then `a R⁺ c`.
 
 Define a predicate `TCV3` that embodies this alternative definition. -/
-
+inductive TCV3 {α : Type} (R : α → α → Prop) : α → α → Prop
+  | base (a b : α)   : R a b → TCV3 R a b
+  | trans (a b c : α) : TCV3 R a b → TCV3 R b c → TCV3 R a c
 -- enter your definition here
 
 /- 2.3 (1 point). Prove that `(step)` also holds as a theorem about `TCV3`. -/
@@ -84,12 +94,21 @@ Define a predicate `TCV3` that embodies this alternative definition. -/
 theorem TCV3_step {α : Type} (R : α → α → Prop) (a b c : α) (rab : R a b)
       (tbc : TCV3 R b c) :
     TCV3 R a c :=
-  sorry
+  TCV3.trans a b c (TCV3.base a b rab) tbc
 
 /- 2.4 (1 point). Prove the following theorem by rule induction: -/
 
 theorem TCV1_pets {α : Type} (R : α → α → Prop) (c : α) :
     ∀a b, TCV1 R a b → R b c → TCV1 R a c :=
-  sorry
+  by
+    intros a b rab rbc
+    induction rab with
+    | base a' b' rab => 
+      
+      exact TCV1.step _ _ _ rab (TCV1.base _ _ rbc)
+    | step a' b' c' rab' rbc' rbc'ih => 
+      apply TCV1.step _ _ _ rab'
+      apply rbc'ih
+      exact rbc 
 
 end LoVe
